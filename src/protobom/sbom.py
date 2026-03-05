@@ -446,13 +446,15 @@ class NodeList:
     ) -> None:
         if node_id in visited:
             return
-        if max_depth >= 0 and depth > max_depth:
-            return
         visited.add(node_id)
         for edge in self._edge_index.get(node_id, []):
             for target_id in edge.to:
+                if target_id in visited:
+                    continue
+                if max_depth >= 0 and depth >= max_depth:
+                    continue
                 node = self._node_index.get(target_id)
-                if node and target_id not in visited:
+                if node:
                     result.append(node)
                     self._traverse_descendants(
                         target_id, depth + 1, max_depth, visited, result

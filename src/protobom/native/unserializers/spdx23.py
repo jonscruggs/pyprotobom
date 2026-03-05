@@ -229,11 +229,15 @@ class SPDX23Unserializer(Unserializer):
             if len(parts) == 2:
                 creator_type, creator_value = parts[0].strip(), parts[1].strip()
                 if creator_type == "Tool":
-                    # Parse tool name and version
-                    tool_parts = creator_value.split("-", 1)
-                    tool = Tool(name=tool_parts[0].strip())
-                    if len(tool_parts) > 1:
-                        tool.version = tool_parts[1].strip()
+                    # Parse tool name and version (last dash-separated segment is version)
+                    last_dash = creator_value.rfind("-")
+                    if last_dash > 0:
+                        tool = Tool(
+                            name=creator_value[:last_dash].strip(),
+                            version=creator_value[last_dash + 1:].strip(),
+                        )
+                    else:
+                        tool = Tool(name=creator_value.strip())
                     md.tools.append(tool)
                 elif creator_type in ("Person", "Organization"):
                     person = Person(
