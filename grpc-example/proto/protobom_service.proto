@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package protobom_service;
+
+option go_package = "github.com/protobom/pyprotobom/grpc-example/proto";
+
+// ProtobomService exposes protobom operations over gRPC.
+service ProtobomService {
+  // Parse an SBOM file on the server and return its document handle.
+  rpc ParseFile(ParseFileRequest) returns (ParseFileResponse);
+
+  // Get metadata about a previously parsed document.
+  rpc GetDocumentInfo(DocumentRequest) returns (DocumentInfoResponse);
+
+  // List all nodes in a document.
+  rpc GetNodes(DocumentRequest) returns (GetNodesResponse);
+
+  // Get details about a single node.
+  rpc GetNodeInfo(GetNodeInfoRequest) returns (NodeInfoResponse);
+
+  // Get all edges in a document.
+  rpc GetEdges(DocumentRequest) returns (GetEdgesResponse);
+
+  // Convert an SBOM: read raw bytes in one format, return serialised bytes
+  // in another format.  No server-side file I/O required.
+  rpc Convert(ConvertRequest) returns (ConvertResponse);
+
+  // Create a new empty document on the server.
+  rpc CreateDocument(CreateDocumentRequest) returns (CreateDocumentResponse);
+
+  // Add a package node to an existing document.
+  rpc AddNode(AddNodeRequest) returns (Empty);
+
+  // Add a relationship edge to an existing document.
+  rpc AddEdge(AddEdgeRequest) returns (Empty);
+
+  // Serialise a document to the requested format and return the bytes.
+  rpc Render(RenderRequest) returns (RenderResponse);
+
+  // Release a document from server memory.
+  rpc CloseDocument(DocumentRequest) returns (Empty);
+
+  // List supported output format strings.
+  rpc ListFormats(Empty) returns (ListFormatsResponse);
+}
+
+// ---- request / response messages ----
+
+message Empty {}
+
+message ParseFileRequest {
+  string path = 1;  // server-local path to an SBOM file
+}
+
+message ParseFileResponse {
+  string handle = 1;
+}
+
+message DocumentRequest {
+  string handle = 1;
+}
+
+message DocumentInfoResponse {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+  string source_format = 4;
+}
+
+message NodeInfo {
+  string id = 1;
+  string type = 2;         // "PACKAGE" or "FILE"
+  string name = 3;
+  string version = 4;
+  string file_name = 5;
+  string copyright = 6;
+  string license_concluded = 7;
+  string comment = 8;
+  string description = 9;
+  string purl = 10;
+}
+
+message GetNodesResponse {
+  repeated NodeInfo nodes = 1;
+  repeated string root_ids = 2;
+}
+
+message GetNodeInfoRequest {
+  string handle = 1;
+  string node_id = 2;
+}
+
+message NodeInfoResponse {
+  NodeInfo node = 1;
+}
+
+message EdgeInfo {
+  string type = 1;
+  string from_node = 2;
+  repeated string to_nodes = 3;
+}
+
+message GetEdgesResponse {
+  repeated EdgeInfo edges = 1;
+}
+
+message ConvertRequest {
+  bytes sbom_data = 1;        // raw SBOM content
+  string output_format = 2;   // target format string
+}
+
+message ConvertResponse {
+  bytes sbom_data = 1;        // converted output
+  string detected_format = 2; // format detected in input
+}
+
+message CreateDocumentRequest {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+}
+
+message CreateDocumentResponse {
+  string handle = 1;
+}
+
+message AddNodeRequest {
+  string handle = 1;
+  string id = 2;
+  string name = 3;
+  string version = 4;
+  string purl = 5;
+  bool is_root = 6;  // if true, also add to root elements
+}
+
+message AddEdgeRequest {
+  string handle = 1;
+  string from_node_id = 2;
+  string edge_type = 3;       // e.g. "dependsOn", "contains"
+  repeated string to_node_ids = 4;
+}
+
+message RenderRequest {
+  string handle = 1;
+  string format = 2;  // output format string
+}
+
+message RenderResponse {
+  bytes sbom_data = 1;
+}
+
+message ListFormatsResponse {
+  repeated string formats = 1;
+}
