@@ -1,0 +1,196 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "nginx-1.24.0",
+  "documentNamespace": "https://spdx.org/spdxdocs/nginx-1.24.0-abcdef12-3456-7890-abcd-ef1234567890",
+  "creationInfo": {
+    "created": "2024-01-15T10:30:00Z",
+    "creators": [
+      "Tool: syft-0.98.0",
+      "Organization: Acme Corp (security@acme.example.com)"
+    ],
+    "licenseListVersion": "3.22",
+    "comment": "SBOM generated for nginx container image"
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-nginx",
+      "name": "nginx",
+      "versionInfo": "1.24.0",
+      "downloadLocation": "https://nginx.org/download/nginx-1.24.0.tar.gz",
+      "homepage": "https://nginx.org",
+      "supplier": "Organization: F5 Inc",
+      "originator": "Person: Igor Sysoev",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "copyrightText": "Copyright (C) 2002-2024 Igor Sysoev, Nginx Inc.",
+      "description": "nginx [engine x] is an HTTP and reverse proxy server",
+      "primaryPackagePurpose": "APPLICATION",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "77a2541637b92a621e3ee76776c8b7b40571f646d9007e4c1e28f782ce63d6bc"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/nginx@1.24.0"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:f5:nginx:1.24.0:*:*:*:*:*:*:*"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-openssl",
+      "name": "openssl",
+      "versionInfo": "3.1.4",
+      "downloadLocation": "https://www.openssl.org/source/openssl-3.1.4.tar.gz",
+      "homepage": "https://www.openssl.org",
+      "supplier": "Organization: OpenSSL Software Foundation",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "Copyright (c) 1998-2024 The OpenSSL Project Authors",
+      "description": "TLS/SSL and crypto library",
+      "primaryPackagePurpose": "LIBRARY",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "840af5366ab9b522bde525826be3ef0fb0af81c6a9ebd84cee0b5c6e8f2b3f5d"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/openssl@3.1.4"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pcre2",
+      "name": "pcre2",
+      "versionInfo": "10.42",
+      "downloadLocation": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.42/pcre2-10.42.tar.gz",
+      "homepage": "https://www.pcre.org",
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "Copyright (c) 1997-2023 University of Cambridge",
+      "description": "Perl Compatible Regular Expressions",
+      "primaryPackagePurpose": "LIBRARY",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c33b418e3b936ee3153de2c61cc638e7e4fe3156022a5c77d0711bcbb9d64f1f"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/pcre2@10.42"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-zlib",
+      "name": "zlib",
+      "versionInfo": "1.3",
+      "downloadLocation": "https://www.zlib.net/zlib-1.3.tar.gz",
+      "homepage": "https://www.zlib.net",
+      "originator": "Person: Jean-loup Gailly (jloup@gzip.org)",
+      "licenseConcluded": "Zlib",
+      "licenseDeclared": "Zlib",
+      "copyrightText": "Copyright (C) 1995-2023 Jean-loup Gailly and Mark Adler",
+      "description": "A massively spiffy yet delicately unobtrusive compression library",
+      "primaryPackagePurpose": "LIBRARY",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ff0ba4c292013dbc27530b3a81e1f9a813cd39de01ca5e0f8bf355702efa593e"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/zlib@1.3"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-nginx-conf",
+      "fileName": "/etc/nginx/nginx.conf",
+      "copyrightText": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "fileTypes": ["TEXT"],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-File-nginx-binary",
+      "fileName": "/usr/sbin/nginx",
+      "copyrightText": "NOASSERTION",
+      "licenseConcluded": "BSD-2-Clause",
+      "fileTypes": ["BINARY"],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-nginx"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-nginx",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-openssl"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-nginx",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-pcre2"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-nginx",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-zlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-nginx",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-nginx-conf"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-nginx",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-nginx-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-openssl",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-Package-zlib"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-03-10T09:00:00Z",
+    "tools": [
+      {
+        "vendor": "anchore",
+        "name": "syft",
+        "version": "0.105.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "data-pipeline",
+      "name": "data-pipeline",
+      "version": "1.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pandas@2.1.4",
+      "name": "pandas",
+      "version": "2.1.4",
+      "description": "Powerful data structures for data analysis",
+      "purl": "pkg:pypi/pandas@2.1.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "aaa111bbb222ccc333ddd444eee555fff666aaa111bbb222ccc333ddd444eee555"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/numpy@1.26.3",
+      "name": "numpy",
+      "version": "1.26.3",
+      "description": "Fundamental package for array computing with Python",
+      "purl": "pkg:pypi/numpy@1.26.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/sqlalchemy@2.0.25",
+      "name": "sqlalchemy",
+      "version": "2.0.25",
+      "description": "Database Abstraction Library",
+      "purl": "pkg:pypi/sqlalchemy@2.0.25",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/requests@2.31.0",
+      "name": "requests",
+      "version": "2.31.0",
+      "description": "Python HTTP for Humans",
+      "purl": "pkg:pypi/requests@2.31.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/click@8.1.7",
+      "name": "click",
+      "version": "8.1.7",
+      "description": "Composable command line interface toolkit",
+      "purl": "pkg:pypi/click@8.1.7",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "data-pipeline",
+      "dependsOn": [
+        "pkg:pypi/pandas@2.1.4",
+        "pkg:pypi/sqlalchemy@2.0.25",
+        "pkg:pypi/requests@2.31.0",
+        "pkg:pypi/click@8.1.7"
+      ]
+    },
+    {
+      "ref": "pkg:pypi/pandas@2.1.4",
+      "dependsOn": [
+        "pkg:pypi/numpy@1.26.3"
+      ]
+    },
+    {
+      "ref": "pkg:pypi/numpy@1.26.3",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:pypi/sqlalchemy@2.0.25",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:pypi/requests@2.31.0",
+      "dependsOn": []
+    }
+  ]
+}
