@@ -1,16 +1,24 @@
-"""Core SBOM data models mirroring the protobom protobuf schema."""
+"""Core SBOM data models mirroring the protobom protobuf schema.
+
+Each dataclass provides to_proto() and from_proto() methods for converting
+to/from the generated protobuf message types in protobom.generated.sbom_pb2.
+"""
 
 from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import IntEnum
 from typing import Optional
 
+from google.protobuf.timestamp_pb2 import Timestamp as PbTimestamp
+
+from protobom.generated import sbom_pb2 as pb
+
 
 # ---------------------------------------------------------------------------
-# Enumerations
+# Enumerations  (values match the proto definitions exactly)
 # ---------------------------------------------------------------------------
 
 class NodeType(IntEnum):
@@ -211,6 +219,26 @@ class ExternalReferenceType(IntEnum):
 
 
 # ---------------------------------------------------------------------------
+# Protobuf timestamp helpers
+# ---------------------------------------------------------------------------
+
+def _datetime_to_pb_timestamp(dt: Optional[datetime]) -> Optional[PbTimestamp]:
+    """Convert a Python datetime to a protobuf Timestamp."""
+    if dt is None:
+        return None
+    ts = PbTimestamp()
+    ts.FromDatetime(dt)
+    return ts
+
+
+def _pb_timestamp_to_datetime(ts: PbTimestamp) -> Optional[datetime]:
+    """Convert a protobuf Timestamp to a Python datetime, or None if unset."""
+    if ts.seconds == 0 and ts.nanos == 0:
+        return None
+    return ts.ToDatetime(tzinfo=timezone.utc)
+
+
+# ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
 
@@ -219,6 +247,13 @@ class Property:
     """Key-value pair for extensible metadata."""
     name: str = ""
     data: str = ""
+
+    def to_proto(self) -> pb.Property:
+        return pb.Property(name=self.name, data=self.data)
+
+    @staticmethod
+    def from_proto(msg: pb.Property) -> Property:
+        return Property(name=msg.name, data=msg.data)
 
 
 @dataclass
@@ -229,6 +264,25 @@ class ExternalReference:
     comment: str = ""
     authority: str = ""
     hashes: dict[int, str] = field(default_factory=dict)  # HashAlgorithm -> hash
+
+    def to_proto(self) -> pb.ExternalReference:
+        return pb.ExternalReference(
+            url=self.url,
+            type=int(self.type),
+            comment=self.comment,
+            authority=self.authority,
+            hashes=self.hashes,
+        )
+
+    @staticmethod
+    def from_proto(msg: pb.ExternalReference) -> ExternalReference:
+        return ExternalReference(
+            url=msg.url,
+            type=ExternalReferenceType(msg.type),
+            comment=msg.comment,
+            authority=msg.authority,
+            hashes=dict(msg.hashes),
+        )
 
 
 @dataclass
@@ -241,6 +295,27 @@ class Person:
     phone: str = ""
     contacts: list[Person] = field(default_factory=list)
 
+    def to_proto(self) -> pb.Person:
+        return pb.Person(
+            name=self.name,
+            is_org=self.is_org,
+            email=self.email,
+            url=self.url,
+            phone=self.phone,
+            contacts=[c.to_proto() for c in self.contacts],
+        )
+
+    @staticmethod
+    def from_proto(msg: pb.Person) -> Person:
+        return Person(
+            name=msg.name,
+            is_org=msg.is_org,
+            email=msg.email,
+            url=msg.url,
+            phone=msg.phone,
+            contacts=[Person.from_proto(c) for c in msg.contacts],
+        )
+
 
 @dataclass
 class Tool:
@@ -248,6 +323,13 @@ class Tool:
     name: str = ""
     version: str = ""
     vendor: str = ""
+
+    def to_proto(self) -> pb.Tool:
+        return pb.Tool(name=self.name, version=self.version, vendor=self.vendor)
+
+    @staticmethod
+    def from_proto(msg: pb.Tool) -> Tool:
+        return Tool(name=msg.name, version=msg.version, vendor=msg.vendor)
 
 
 @dataclass
@@ -257,6 +339,21 @@ class DocumentType:
     name: str = ""
     description: str = ""
 
+    def to_proto(self) -> pb.DocumentType:
+        return pb.DocumentType(
+            type=int(self.type),
+            name=self.name,
+            description=self.description,
+        )
+
+    @staticmethod
+    def from_proto(msg: pb.DocumentType) -> DocumentType:
+        return DocumentType(
+            type=SBOMType(msg.type),
+            name=msg.name,
+            description=msg.description,
+        )
+
 
 @dataclass
 class SourceData:
@@ -265,6 +362,23 @@ class SourceData:
     hashes: dict[int, str] = field(default_factory=dict)
     size: int = 0
     uri: str = ""
+
+    def to_proto(self) -> pb.SourceData:
+        return pb.SourceData(
+            format=self.format,
+            hashes=self.hashes,
+            size=self.size,
+            uri=self.uri if self.uri else None,
+        )
+
+    @staticmethod
+    def from_proto(msg: pb.SourceData) -> SourceData:
+        return SourceData(
+            format=msg.format,
+            hashes=dict(msg.hashes),
+            size=msg.size,
+            uri=msg.uri if msg.HasField("uri") else "",
+        )
 
 
 @dataclass
@@ -279,6 +393,43 @@ class Metadata:
     comment: str = ""
     document_types: list[DocumentType] = field(default_factory=list)
     source_data: Optional[SourceData] = None
+
+    def to_proto(self) -> pb.Metadata:
+        msg = pb.Metadata(
+            id=self.id,
+            version=self.version,
+            name=self.name,
+            comment=self.comment,
+            tools=[t.to_proto() for t in self.tools],
+            authors=[a.to_proto() for a in self.authors],
+            documentTypes=[dt.to_proto() for dt in self.document_types],
+        )
+        ts = _datetime_to_pb_timestamp(self.date)
+        if ts is not None:
+            msg.date.CopyFrom(ts)
+        if self.source_data is not None:
+            msg.source_data.CopyFrom(self.source_data.to_proto())
+        return msg
+
+    @staticmethod
+    def from_proto(msg: pb.Metadata) -> Metadata:
+        date = _pb_timestamp_to_datetime(msg.date) if msg.HasField("date") else None
+        source_data = (
+            SourceData.from_proto(msg.source_data)
+            if msg.HasField("source_data")
+            else None
+        )
+        return Metadata(
+            id=msg.id,
+            version=msg.version,
+            name=msg.name,
+            date=date,
+            tools=[Tool.from_proto(t) for t in msg.tools],
+            authors=[Person.from_proto(a) for a in msg.authors],
+            comment=msg.comment,
+            document_types=[DocumentType.from_proto(dt) for dt in msg.documentTypes],
+            source_data=source_data,
+        )
 
 
 @dataclass
@@ -312,6 +463,89 @@ class Node:
     valid_until_date: Optional[datetime] = None
     file_types: list[str] = field(default_factory=list)
 
+    def to_proto(self) -> pb.Node:
+        msg = pb.Node(
+            id=self.id,
+            type=int(self.type),
+            name=self.name,
+            version=self.version,
+            file_name=self.file_name,
+            url_home=self.url_home,
+            url_download=self.url_download,
+            licenses=self.licenses,
+            license_concluded=self.license_concluded,
+            license_comments=self.license_comments,
+            copyright=self.copyright,
+            source_info=self.source_info,
+            comment=self.comment,
+            summary=self.summary,
+            description=self.description,
+            attribution=self.attribution,
+            suppliers=[s.to_proto() for s in self.suppliers],
+            originators=[o.to_proto() for o in self.originators],
+            external_references=[e.to_proto() for e in self.external_references],
+            hashes=self.hashes,
+            identifiers=self.identifiers,
+            primary_purpose=[int(p) for p in self.primary_purpose],
+            properties=[p.to_proto() for p in self.properties],
+            file_types=self.file_types,
+        )
+        for attr, field_name in [
+            ("release_date", "release_date"),
+            ("build_date", "build_date"),
+            ("valid_until_date", "valid_until_date"),
+        ]:
+            ts = _datetime_to_pb_timestamp(getattr(self, attr))
+            if ts is not None:
+                getattr(msg, field_name).CopyFrom(ts)
+        return msg
+
+    @staticmethod
+    def from_proto(msg: pb.Node) -> Node:
+        return Node(
+            id=msg.id,
+            type=NodeType(msg.type),
+            name=msg.name,
+            version=msg.version,
+            file_name=msg.file_name,
+            url_home=msg.url_home,
+            url_download=msg.url_download,
+            licenses=list(msg.licenses),
+            license_concluded=msg.license_concluded,
+            license_comments=msg.license_comments,
+            copyright=msg.copyright,
+            hashes=dict(msg.hashes),
+            source_info=msg.source_info,
+            primary_purpose=[Purpose(p) for p in msg.primary_purpose],
+            comment=msg.comment,
+            summary=msg.summary,
+            description=msg.description,
+            attribution=list(msg.attribution),
+            suppliers=[Person.from_proto(s) for s in msg.suppliers],
+            originators=[Person.from_proto(o) for o in msg.originators],
+            external_references=[
+                ExternalReference.from_proto(e) for e in msg.external_references
+            ],
+            identifiers=dict(msg.identifiers),
+            properties=[Property.from_proto(p) for p in msg.properties],
+            release_date=(
+                _pb_timestamp_to_datetime(msg.release_date)
+                if msg.HasField("release_date")
+                else None
+            ),
+            build_date=(
+                _pb_timestamp_to_datetime(msg.build_date)
+                if msg.HasField("build_date")
+                else None
+            ),
+            valid_until_date=(
+                _pb_timestamp_to_datetime(msg.valid_until_date)
+                if msg.HasField("valid_until_date")
+                else None
+            ),
+            file_types=list(msg.file_types),
+        )
+
 
 @dataclass
 class Edge:
@@ -319,6 +553,20 @@ class Edge:
     type: EdgeType = EdgeType.UNKNOWN
     from_: str = ""  # source node ID
     to: list[str] = field(default_factory=list)  # target node IDs
+
+    def to_proto(self) -> pb.Edge:
+        # The proto field is named 'from' (Python reserved word)
+        msg = pb.Edge(type=int(self.type), to=self.to)
+        setattr(msg, "from", self.from_)
+        return msg
+
+    @staticmethod
+    def from_proto(msg: pb.Edge) -> Edge:
+        return Edge(
+            type=EdgeType(msg.type),
+            from_=getattr(msg, "from"),
+            to=list(msg.to),
+        )
 
 
 class NodeList:
@@ -514,9 +762,52 @@ class NodeList:
         else:
             self.add_edge(Edge(type=edge_type, from_=target_id, to=[node.id]))
 
+    def to_proto(self) -> pb.NodeList:
+        """Convert to a protobuf NodeList message."""
+        return pb.NodeList(
+            nodes=[n.to_proto() for n in self.nodes],
+            edges=[e.to_proto() for e in self.edges],
+            root_elements=self.root_elements,
+        )
+
+    @staticmethod
+    def from_proto(msg: pb.NodeList) -> NodeList:
+        """Create a NodeList from a protobuf NodeList message."""
+        return NodeList(
+            nodes=[Node.from_proto(n) for n in msg.nodes],
+            edges=[Edge.from_proto(e) for e in msg.edges],
+            root_elements=list(msg.root_elements),
+        )
+
 
 @dataclass
 class Document:
     """Root SBOM document containing metadata and a node graph."""
     metadata: Metadata = field(default_factory=Metadata)
     node_list: NodeList = field(default_factory=NodeList)
+
+    def to_proto(self) -> pb.Document:
+        """Convert to a protobuf Document message."""
+        msg = pb.Document()
+        msg.metadata.CopyFrom(self.metadata.to_proto())
+        msg.node_list.CopyFrom(self.node_list.to_proto())
+        return msg
+
+    @staticmethod
+    def from_proto(msg: pb.Document) -> Document:
+        """Create a Document from a protobuf Document message."""
+        return Document(
+            metadata=Metadata.from_proto(msg.metadata),
+            node_list=NodeList.from_proto(msg.node_list),
+        )
+
+    def serialize_to_proto(self) -> bytes:
+        """Serialize to protobuf binary format."""
+        return self.to_proto().SerializeToString()
+
+    @staticmethod
+    def deserialize_from_proto(data: bytes) -> Document:
+        """Deserialize from protobuf binary format."""
+        msg = pb.Document()
+        msg.ParseFromString(data)
+        return Document.from_proto(msg)

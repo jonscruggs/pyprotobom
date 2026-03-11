@@ -9,6 +9,9 @@ description = "A Python library for working with Software Bills of Materials (SB
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
+dependencies = [
+    "protobuf>=4.21.0",
+]
 authors = [
     {name = "The Protobom Authors"},
 ]

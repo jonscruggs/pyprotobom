@@ -114,6 +114,11 @@ class Reader:
             buf.seek(0)
 
         if detected_format is None:
+            # Try protobuf binary format
+            try:
+                return Document.deserialize_from_proto(content)
+            except Exception:
+                pass
             raise ValueError("Unable to detect SBOM format from stream content")
 
         # Get unserializer

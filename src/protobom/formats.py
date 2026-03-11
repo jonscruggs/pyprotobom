@@ -30,6 +30,9 @@ CDX14JSON = "application/vnd.cyclonedx+json;version=1.4"
 CDX15JSON = "application/vnd.cyclonedx+json;version=1.5"
 CDX16JSON = "application/vnd.cyclonedx+json;version=1.6"
 
+# Protobuf binary format
+PROTOBUF = "application/vnd.protobom+protobuf"
+
 # List of supported formats
 SUPPORTED_FORMATS = [
     SPDX23JSON,

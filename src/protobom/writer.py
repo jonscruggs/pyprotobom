@@ -109,6 +109,12 @@ class Writer:
 
         _ensure_initialized()
         format_str = str(opts.format)
+
+        # Handle protobuf binary format
+        if format_str == formats.PROTOBUF:
+            stream.write(document.serialize_to_proto())
+            return
+
         serializer = _serializers.get(format_str)
         if serializer is None:
             raise ValueError(f"No serializer registered for format: {format_str}")
